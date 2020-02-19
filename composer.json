@@ -1,0 +1,14 @@
+{
+    "name": "nettantra/nt-php-imap",
+    "description": "This is an attempt to create pure PHP based IMAP library and a dropin replacement for the `php-imap` extension.",
+    "type": "library",
+    "license": "MIT LICENSE",
+    "authors": [
+        {
+            "name": "Devadatta Sahoo",
+            "email": "devadattas@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
