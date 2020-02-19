@@ -21,5 +21,7 @@
         "files": ["lib/nt-php-imap.php"]
     },
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "horde/imap-client": "dev-master"
+    }
 }

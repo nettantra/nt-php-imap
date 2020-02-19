@@ -480,7 +480,7 @@ if(!function_exists('imap_num_recent')) {
  * Ref: https://www.php.net/manual/en/function.imap-open.php
  **/
 if(!function_exists('imap_open')) {
-  function imap_open() {
+  function imap_open(string $mailbox, string $username, string $password, int $options = 0, int $n_retries = 0, array $params = array() ) {
   }
 }
 
