@@ -1,5 +1,5 @@
 # NetTantra php-imap
-This is an attempt to create pure PHP based IMAP library and a dropin replacement for the `php-imap` extension.
+This is an attempt to create pure PHP based IMAP library and a dropin replacement for the `php-imap` extension based on https://github.com/horde/Imap_Client.
 
 ## IMAP Functions Implemented
 * Non Yet
