@@ -1,8 +1,8 @@
-# NetTantra php-imap
+# NetTantra PHP IMAP Library
 This is an attempt to create pure PHP based IMAP library and a dropin replacement for the `php-imap` extension.
 
 ## IMAP Functions Implemented
-* Non Yet
+* None Yet
 
 ## IMAP Functions to Implement
 *   [imap\_8bit](https://www.php.net/manual/en/function.imap-8bit.php) — Convert an 8bit string to a quoted-printable string
