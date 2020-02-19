@@ -6,9 +6,20 @@
     "authors": [
         {
             "name": "Devadatta Sahoo",
-            "email": "devadattas@gmail.com"
+            "email": "devadatta.sahoo@nettantra.com"
+        },
+        {
+            "name": "Bimalendu Behera",
+            "email": "bimalendu.behera@nettantra.net"
+        },
+        {
+            "name": "NetTantra Technologies",
+            "email": "support@nettantra.com"
         }
     ],
+    "autoload": {
+        "files": ["lib/nt-php-imap.php"]
+    },
     "minimum-stability": "dev",
     "require": {}
 }
