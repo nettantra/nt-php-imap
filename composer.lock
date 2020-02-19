@@ -1,0 +1,62 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "bc0397dfe45b96bdbaa4d27e49d8815f",
+    "packages": [
+        {
+            "name": "horde/imap-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SnelleJelle/composertest.git",
+                "reference": "a40686b520df16709cf40f895804092eca753d5c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SnelleJelle/composertest/zipball/a40686b520df16709cf40f895804092eca753d5c",
+                "reference": "a40686b520df16709cf40f895804092eca753d5c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Monolog": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "test",
+                    "email": "test@example.com",
+                    "homepage": "https://example.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "test",
+            "homepage": "https://example.com",
+            "keywords": [
+                "test"
+            ],
+            "time": "2018-06-10T22:02:55+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "horde/imap-client": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}
