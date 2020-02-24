@@ -5,6 +5,8 @@
  * @package nt-php-imap
  */
 
+$imap_alertQueue = [];
+
 /**
  * imap_8bit - Convert an 8bit string to a quoted-printable string
  * Ref: https://www.php.net/manual/en/function.imap-8bit.php
@@ -22,6 +24,7 @@ if(!function_exists('imap_8bit')) {
  **/
 if(!function_exists('imap_alerts')) {
   function imap_alerts() {
+    return count($imap_alertQueue) ? $imap_alertQueue: false;
   }
 }
 
@@ -30,6 +33,8 @@ if(!function_exists('imap_alerts')) {
  * imap_append - Append a string message to a specified mailbox
  * Ref: https://www.php.net/manual/en/function.imap-append.php
  **/
+
+ //depends on imap_open
 if(!function_exists('imap_append')) {
   function imap_append() {
   }
