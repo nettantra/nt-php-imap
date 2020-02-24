@@ -10,7 +10,8 @@
  * Ref: https://www.php.net/manual/en/function.imap-8bit.php
  **/
 if(!function_exists('imap_8bit')) {
-  function imap_8bit() {
+  function imap_8bit($str_8bit) {
+    return quoted_printable_encode($str_8bit);
   }
 }
 
