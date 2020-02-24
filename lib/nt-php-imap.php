@@ -46,7 +46,8 @@ if(!function_exists('imap_append')) {
  * Ref: https://www.php.net/manual/en/function.imap-base64.php
  **/
 if(!function_exists('imap_base64')) {
-  function imap_base64() {
+  function imap_base64($str_base64) {
+    return base64_decode($str_base64,true);
   }
 }
 
@@ -56,7 +57,8 @@ if(!function_exists('imap_base64')) {
  * Ref: https://www.php.net/manual/en/function.imap-binary.php
  **/
 if(!function_exists('imap_binary')) {
-  function imap_binary() {
+  function imap_binary($str_8bit) {
+    return base64_encode($str_8bit);
   }
 }
 
