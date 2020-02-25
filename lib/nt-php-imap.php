@@ -729,6 +729,7 @@ if(!function_exists('imap_unsubscribe')) {
  **/
 if(!function_exists('imap_utf7_decode')) {
   function imap_utf7_decode() {
+    return mb_convert_encoding( $str, "ISO_8859-1", "UTF7-IMAP" );
   }
 }
 
@@ -738,7 +739,8 @@ if(!function_exists('imap_utf7_decode')) {
  * Ref: https://www.php.net/manual/en/function.imap-utf7-encode.php
  **/
 if(!function_exists('imap_utf7_encode')) {
-  function imap_utf7_encode() {
+  function imap_utf7_encode($str_iso_8859) {
+    return mb_convert_encoding( $str, "UTF7-IMAP", "ISO_8859-1" );
   }
 }
 
@@ -748,7 +750,8 @@ if(!function_exists('imap_utf7_encode')) {
  * Ref: https://www.php.net/manual/en/function.imap-utf8-to-mutf7.php
  **/
 if(!function_exists('imap_utf8_to_mutf7')) {
-  function imap_utf8_to_mutf7() {
+  function imap_utf8_to_mutf7($str_utf8) {
+    return mb_convert_encoding($str_utf8,'UTF7-IMAP');
   }
 }
 
@@ -759,5 +762,6 @@ if(!function_exists('imap_utf8_to_mutf7')) {
  **/
 if(!function_exists('imap_utf8')) {
   function imap_utf8() {
+    return iconv_mime_decode($string,0,"UTF-8");
   }
 }
