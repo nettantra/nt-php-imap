@@ -4,8 +4,9 @@
  *
  * @package nt-php-imap
  */
-
+require_once("../vendor/autoload.php");
 $imap_alertQueue = [];
+exit;
 
 /**
  * imap_8bit - Convert an 8bit string to a quoted-printable string
@@ -34,9 +35,16 @@ if(!function_exists('imap_alerts')) {
  * Ref: https://www.php.net/manual/en/function.imap-append.php
  **/
 
- //depends on imap_open
+ //unverified
 if(!function_exists('imap_append')) {
-  function imap_append() {
+  function imap_append($imap_stream, string $mailbox, string $message, string $options = NULL, string $internal_date = NULL) {
+    $imap_stream->openMailbox($mailbox);
+    $result = $imap_stream->append($mailbox,$message);
+    if(!empty($result)){
+      return true;
+    }else{
+      return false;
+    }
   }
 }
 
@@ -68,7 +76,9 @@ if(!function_exists('imap_binary')) {
  * Ref: https://www.php.net/manual/en/function.imap-body.php
  **/
 if(!function_exists('imap_body')) {
-  function imap_body() {
+  //unverified
+  function imap_body($imap_stream, int $msg_number, int $options = 0) {
+    return $imap_stream->fetchFromSectionString($imap_stream->currentMailbox(),$msg_number); 
   }
 }
 
@@ -88,7 +98,9 @@ if(!function_exists('imap_bodystruct')) {
  * Ref: https://www.php.net/manual/en/function.imap-check.php
  **/
 if(!function_exists('imap_check')) {
-  function imap_check() {
+  //unverified
+  function imap_check($imap_stream) {
+    return $imap_stream->currentMailbox();
   }
 }
 
@@ -98,7 +110,8 @@ if(!function_exists('imap_check')) {
  * Ref: https://www.php.net/manual/en/function.imap-clearflag-full.php
  **/
 if(!function_exists('imap_clearflag_full')) {
-  function imap_clearflag_full() {
+  //unverified
+  function imap_clearflag_full($imap_stream , string $sequence , string $flag, int $options = 0 ) {
   }
 }
 
@@ -108,7 +121,21 @@ if(!function_exists('imap_clearflag_full')) {
  * Ref: https://www.php.net/manual/en/function.imap-close.php
  **/
 if(!function_exists('imap_close')) {
-  function imap_close() {
+  //unverfified
+  function imap_close($imap_stream, int $flag = 0) {
+    try{
+      if($flag!=0){
+        $imap_stream->close([
+          "expunge" => true
+        ]);
+      }else{
+        $imap_stream->close();
+      }
+
+      return true;
+    }catch(Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -118,7 +145,9 @@ if(!function_exists('imap_close')) {
  * Ref: https://www.php.net/manual/en/function.imap-create.php
  **/
 if(!function_exists('imap_create')) {
-  function imap_create() {
+  function imap_create($imap_stream,$mailbox) {
+    $result = imap_createmailbox($imap_stream,$mailbox);
+    return $result;
   }
 }
 
@@ -128,7 +157,10 @@ if(!function_exists('imap_create')) {
  * Ref: https://www.php.net/manual/en/function.imap-createmailbox.php
  **/
 if(!function_exists('imap_createmailbox')) {
-  function imap_createmailbox() {
+  //unverified
+  function imap_createmailbox($imap_stream, $mailbox) {
+    $imap_stream->createMailbox();
+    return true;
   }
 }
 
@@ -138,7 +170,16 @@ if(!function_exists('imap_createmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-delete.php
  **/
 if(!function_exists('imap_delete')) {
-  function imap_delete() {
+  function imap_delete($imap_stream ,$msg_number,$options = 0) {
+    try{
+      $imap_stream->store($imap_stream->currentMailbox, array(
+          'ids' => $msg_number,
+          'add' => array(Horde_Imap_Client::FLAG_DELETED)
+      ));
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -148,7 +189,10 @@ if(!function_exists('imap_delete')) {
  * Ref: https://www.php.net/manual/en/function.imap-deletemailbox.php
  **/
 if(!function_exists('imap_deletemailbox')) {
-  function imap_deletemailbox() {
+  //unverified
+  function imap_deletemailbox($imap_stream, $mailbox) {
+    $imap_stream->deleteMailbox($mailbox);
+    return true;
   }
 }
 
@@ -168,7 +212,7 @@ if(!function_exists('imap_errors')) {
  * Ref: https://www.php.net/manual/en/function.imap-expunge.php
  **/
 if(!function_exists('imap_expunge')) {
-  function imap_expunge() {
+  function imap_expunge( $imap_stream) {
   }
 }
 
@@ -188,7 +232,7 @@ if(!function_exists('imap_fetch_overview')) {
  * Ref: https://www.php.net/manual/en/function.imap-fetchbody.php
  **/
 if(!function_exists('imap_fetchbody')) {
-  function imap_fetchbody() {
+  function imap_fetchbody($imap_stream , int $msg_number , string $section, int $options = 0) {
   }
 }
 
@@ -198,7 +242,7 @@ if(!function_exists('imap_fetchbody')) {
  * Ref: https://www.php.net/manual/en/function.imap-fetchheader.php
  **/
 if(!function_exists('imap_fetchheader')) {
-  function imap_fetchheader() {
+  function imap_fetchheader($imap_stream , int $msg_number, int $options = 0) {
   }
 }
 
@@ -208,7 +252,7 @@ if(!function_exists('imap_fetchheader')) {
  * Ref: https://www.php.net/manual/en/function.imap-fetchmime.php
  **/
 if(!function_exists('imap_fetchmime')) {
-  function imap_fetchmime() {
+  function imap_fetchmime($imap_stream , int $msg_number , string $section, int $options = 0) {
   }
 }
 
@@ -218,7 +262,7 @@ if(!function_exists('imap_fetchmime')) {
  * Ref: https://www.php.net/manual/en/function.imap-fetchstructure.php
  **/
 if(!function_exists('imap_fetchstructure')) {
-  function imap_fetchstructure() {
+  function imap_fetchstructure(resource $imap_stream , int $msg_number, int $options = 0) {
   }
 }
 
@@ -239,6 +283,7 @@ if(!function_exists('imap_fetchtext')) {
  **/
 if(!function_exists('imap_gc')) {
   function imap_gc() {
+    imap_body();
   }
 }
 
@@ -248,7 +293,8 @@ if(!function_exists('imap_gc')) {
  * Ref: https://www.php.net/manual/en/function.imap-get-quota.php
  **/
 if(!function_exists('imap_get_quota')) {
-  function imap_get_quota() {
+  function imap_get_quota($imap_stream,$quota_root) {
+    return $imap_stream->getQuota($quota_root);
   }
 }
 
@@ -258,7 +304,8 @@ if(!function_exists('imap_get_quota')) {
  * Ref: https://www.php.net/manual/en/function.imap-get-quotaroot.php
  **/
 if(!function_exists('imap_get_quotaroot')) {
-  function imap_get_quotaroot() {
+  function imap_get_quotaroot($imap_stream,$quota_root) {
+    return $imap_stream->getQuotaRoot($quota_root);
   }
 }
 
@@ -268,7 +315,8 @@ if(!function_exists('imap_get_quotaroot')) {
  * Ref: https://www.php.net/manual/en/function.imap-getacl.php
  **/
 if(!function_exists('imap_getacl')) {
-  function imap_getacl() {
+  function imap_getacl( resource $imap_stream , string $mailbox) {
+    return $imap_stream->getACL($mailbox);
   }
 }
 
@@ -278,7 +326,8 @@ if(!function_exists('imap_getacl')) {
  * Ref: https://www.php.net/manual/en/function.imap-getmailboxes.php
  **/
 if(!function_exists('imap_getmailboxes')) {
-  function imap_getmailboxes() {
+  function imap_getmailboxes($imap_stream , string $ref , string $pattern ) {
+    return $imap_stream->listMailboxes($pattern);
   }
 }
 
@@ -288,7 +337,8 @@ if(!function_exists('imap_getmailboxes')) {
  * Ref: https://www.php.net/manual/en/function.imap-getsubscribed.php
  **/
 if(!function_exists('imap_getsubscribed')) {
-  function imap_getsubscribed() {
+  function imap_getsubscribed($imap_stream , string $ref , string $pattern) {
+    return $imap_stream->listMailboxes($pattern,Horde_Imap_Client::MBOX_SUBSCRIBED_EXISTS);
   }
 }
 
@@ -299,6 +349,7 @@ if(!function_exists('imap_getsubscribed')) {
  **/
 if(!function_exists('imap_header')) {
   function imap_header() {
+    imap_headerinfo();
   }
 }
 
@@ -338,7 +389,8 @@ if(!function_exists('imap_last_error')) {
  * Ref: https://www.php.net/manual/en/function.imap-list.php
  **/
 if(!function_exists('imap_list')) {
-  function imap_list() {
+  function imap_list($imap_stream , string $ref , string $pattern) {
+    return $imap_stream->listMailboxes($pattern);
   }
 }
 
@@ -348,7 +400,8 @@ if(!function_exists('imap_list')) {
  * Ref: https://www.php.net/manual/en/function.imap-listmailbox.php
  **/
 if(!function_exists('imap_listmailbox')) {
-  function imap_listmailbox() {
+  function imap_listmailbox($imap_stream, $ref,$pattern) {
+    imap_list($imap_stream, $ref,$pattern);
   }
 }
 
@@ -358,7 +411,8 @@ if(!function_exists('imap_listmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-listscan.php
  **/
 if(!function_exists('imap_listscan')) {
-  function imap_listscan() {
+  function imap_listscan($imap_stream , string $ref , string $pattern , string $content) {
+    
   }
 }
 
@@ -368,7 +422,8 @@ if(!function_exists('imap_listscan')) {
  * Ref: https://www.php.net/manual/en/function.imap-listsubscribed.php
  **/
 if(!function_exists('imap_listsubscribed')) {
-  function imap_listsubscribed() {
+  function imap_listsubscribed($imap_stream , string $ref , string $pattern ) {
+    imap_lsub($imap_stream,$ref,$pattern );
   }
 }
 
@@ -378,7 +433,8 @@ if(!function_exists('imap_listsubscribed')) {
  * Ref: https://www.php.net/manual/en/function.imap-lsub.php
  **/
 if(!function_exists('imap_lsub')) {
-  function imap_lsub() {
+  function imap_lsub($imap_stream , string $ref , string $pattern ) {
+    return $imap_stream->listMailboxes($pattern,Horde_Imap_Client::MBOX_SUBSCRIBED_EXISTS);
   }
 }
 
@@ -388,7 +444,7 @@ if(!function_exists('imap_lsub')) {
  * Ref: https://www.php.net/manual/en/function.imap-mail-compose.php
  **/
 if(!function_exists('imap_mail_compose')) {
-  function imap_mail_compose() {
+  function imap_mail_compose(array $envelope , array $body) {
   }
 }
 
@@ -428,7 +484,9 @@ if(!function_exists('imap_mail')) {
  * Ref: https://www.php.net/manual/en/function.imap-mailboxmsginfo.php
  **/
 if(!function_exists('imap_mailboxmsginfo')) {
-  function imap_mailboxmsginfo() {
+  function imap_mailboxmsginfo( $imap_stream) {
+    $mailbox = $imap_stream->currentMailbox();
+    return $imap_stream->status($mailbox[0]);
   }
 }
 
@@ -439,6 +497,7 @@ if(!function_exists('imap_mailboxmsginfo')) {
  **/
 if(!function_exists('imap_mime_header_decode')) {
   function imap_mime_header_decode() {
+
   }
 }
 
@@ -478,7 +537,8 @@ if(!function_exists('imap_num_msg')) {
  * Ref: https://www.php.net/manual/en/function.imap-num-recent.php
  **/
 if(!function_exists('imap_num_recent')) {
-  function imap_num_recent() {
+  function imap_num_recent($imap_stream) {
+
   }
 }
 
@@ -488,7 +548,81 @@ if(!function_exists('imap_num_recent')) {
  * Ref: https://www.php.net/manual/en/function.imap-open.php
  **/
 if(!function_exists('imap_open')) {
+  
   function imap_open(string $mailbox, string $username, string $password, int $options = 0, int $n_retries = 0, array $params = array() ) {
+     
+    if(is_empty($mailbox)){
+        return null;
+      }
+      else{
+        $tmp = explode(":",$mailbox);
+      
+        $host = substr($tmp[0],1);
+        $port = filter_var($mailbox, FILTER_SANITIZE_NUMBER_INT);
+        $folder =  explode("}",$tmp[1]);
+
+        if(isset($folder[1])){
+          $folder = $folder[1];
+        }else{
+          $folder = null;
+        }  
+
+        $protocol = false;
+        
+        $tmp[1] = strtolower($tmp[1]);
+        if(strpos($tmp[1], 'ssl') !== false) {
+          $protocol = "ssl";
+        }
+        
+        if(strpos($tmp[1], 'sslv2') !== false) {
+          $protocol = "sslv2";
+        }
+
+        if(strpos($tmp[1], 'sslv3') !== false) {
+          $protocol = "sslv3";
+        }
+
+        if(strpos($tmp[1], 'tls') !== false) {
+          $protocol = "tls";
+        }
+
+        if(strpos($tmp[1], 'tlsv1') !== false) {
+          $protocol = "tlsv1";
+        }
+
+      
+      
+        $client = new Horde_Imap_Client_Socket(array(
+          'username' => $username,
+          'password' => $password,
+          'hostspec' => $host,
+          'port' => $port,
+          'secure' => $protocol, //ssl,tls etc
+        
+          // OPTIONAL Debugging. Will output IMAP log to the /tmp/foo file
+          'debug' => '/tmp/foo',
+        
+          // OPTIONAL Caching. Will use cache files in /tmp/hordecache.
+          // Requires the Horde/Cache package, an optional dependency to
+          // Horde/Imap_Client.
+          'cache' => array(
+              'backend' => new Horde_Imap_Client_Cache_Backend_Cache(array(
+                  'cacheob' => new Horde_Cache(new Horde_Cache_Storage_File(array(
+                      'dir' => '/tmp/hordecache'
+                  )))
+              ))
+          )
+        ));
+        
+        $client->login();
+
+        if(!empty($folder)){
+          $client->openMailbox($folder);
+        }
+      
+        return $client;
+        
+      }
   }
 }
 
@@ -498,7 +632,7 @@ if(!function_exists('imap_open')) {
  * Ref: https://www.php.net/manual/en/function.imap-ping.php
  **/
 if(!function_exists('imap_ping')) {
-  function imap_ping() {
+  function imap_ping($imap_stream) {
   }
 }
 
@@ -508,7 +642,8 @@ if(!function_exists('imap_ping')) {
  * Ref: https://www.php.net/manual/en/function.imap-qprint.php
  **/
 if(!function_exists('imap_qprint')) {
-  function imap_qprint() {
+  function imap_qprint($string) {
+    return quoted_printable_decode($string);
   }
 }
 
@@ -518,7 +653,8 @@ if(!function_exists('imap_qprint')) {
  * Ref: https://www.php.net/manual/en/function.imap-rename.php
  **/
 if(!function_exists('imap_rename')) {
-  function imap_rename() {
+  function imap_rename($imap_stream, string $old_mbox, string $new_mbox) {
+    return imap_renamemailbox($imap_stream,$old_mbox,$new_mbox);
   }
 }
 
@@ -528,7 +664,15 @@ if(!function_exists('imap_rename')) {
  * Ref: https://www.php.net/manual/en/function.imap-renamemailbox.php
  **/
 if(!function_exists('imap_renamemailbox')) {
-  function imap_renamemailbox() {
+  function imap_renamemailbox($imap_stream, string $old_mbox, string $new_mbox) {
+    try{
+      
+      $imap_stream->renameMailbox($old_mbox,$new_mbox);
+      return true;
+
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -538,7 +682,15 @@ if(!function_exists('imap_renamemailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-reopen.php
  **/
 if(!function_exists('imap_reopen')) {
-  function imap_reopen() {
+  function imap_reopen($imap_stream , string $mailbox, int $options = 0, int $n_retries = 0) {
+    try{
+      
+      $imap_stream->openMailbox($mailbox);
+      return true;
+
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -548,7 +700,33 @@ if(!function_exists('imap_reopen')) {
  * Ref: https://www.php.net/manual/en/function.imap-rfc822-parse-adrlist.php
  **/
 if(!function_exists('imap_rfc822_parse_adrlist')) {
-  function imap_rfc822_parse_adrlist() {
+  function imap_rfc822_parse_adrlist($address,$default_host) {
+
+    $emails = explode(",",$address);
+    $result = [];
+    $i=0;
+    foreach($emails as $email){
+      $tmp = explode("<",$email);
+      if(count($tmp) == 2){
+        $personal = $tmp[0];
+        $tmp = explode("@",$tmp[1]);
+      }else{
+        $personal = '';
+        $tmp = explode("@",$tmp[0]);
+      }
+
+      $mailbox = $tmp[0];
+
+      $result[$i] = new StdClass;
+      $result[$i]->mailbox = trim($mailbox);
+      $result[$i]->host = trim($default_host);
+      $result[$i]->personal = trim($personal);
+      
+      $i++;  
+    }
+
+    return $result;
+
   }
 }
 
@@ -558,7 +736,7 @@ if(!function_exists('imap_rfc822_parse_adrlist')) {
  * Ref: https://www.php.net/manual/en/function.imap-rfc822-parse-headers.php
  **/
 if(!function_exists('imap_rfc822_parse_headers')) {
-  function imap_rfc822_parse_headers() {
+  function imap_rfc822_parse_headers(string $headers, string $defaulthost = "UNKNOWN") {
   }
 }
 
@@ -568,7 +746,12 @@ if(!function_exists('imap_rfc822_parse_headers')) {
  * Ref: https://www.php.net/manual/en/function.imap-rfc822-write-address.php
  **/
 if(!function_exists('imap_rfc822_write_address')) {
-  function imap_rfc822_write_address() {
+  function imap_rfc822_write_address(string $mailbox , string $host , string $personal) {
+    $personal = trim($personal);
+    $host=trim(strtolower($host));
+    $mailbox=trim(strtolower($mailbox));
+    
+    return $personal." <".$mailbox."@".$host.">"; 
   }
 }
 
@@ -578,7 +761,7 @@ if(!function_exists('imap_rfc822_write_address')) {
  * Ref: https://www.php.net/manual/en/function.imap-savebody.php
  **/
 if(!function_exists('imap_savebody')) {
-  function imap_savebody() {
+  function imap_savebody($imap_stream ,$file , $msg_number, $part_number = "", $options = 0) {
   }
 }
 
@@ -588,7 +771,8 @@ if(!function_exists('imap_savebody')) {
  * Ref: https://www.php.net/manual/en/function.imap-scan.php
  **/
 if(!function_exists('imap_scan')) {
-  function imap_scan() {
+  function imap_scan($imap_stream,$ref,$pattern,$content) {
+    return imap_listscan($imap_stream,$ref,$pattern,$content);
   }
 }
 
@@ -598,7 +782,8 @@ if(!function_exists('imap_scan')) {
  * Ref: https://www.php.net/manual/en/function.imap-scanmailbox.php
  **/
 if(!function_exists('imap_scanmailbox')) {
-  function imap_scanmailbox() {
+  function imap_scanmailbox($imap_stream,$ref,$pattern,$content) {
+    return imap_listscan($imap_stream,$ref,$pattern,$content);
   }
 }
 
@@ -608,7 +793,15 @@ if(!function_exists('imap_scanmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-search.php
  **/
 if(!function_exists('imap_search')) {
-  function imap_search() {
+  function imap_search($imap_stream,$criteria,$options,$charset = NULL) {
+    try{
+      
+      $imap_stream->setQuota($imap_stream->currentMailbox(),$criteria,[$options]);
+      return true;
+
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -618,7 +811,15 @@ if(!function_exists('imap_search')) {
  * Ref: https://www.php.net/manual/en/function.imap-set-quota.php
  **/
 if(!function_exists('imap_set_quota')) {
-  function imap_set_quota() {
+  function imap_set_quota($imap_stream, string $quota_root , int $quota_limit) {
+    try{
+      
+      $imap_stream->setQuota($quota_root,$quota_limit);
+      return true;
+
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -628,7 +829,24 @@ if(!function_exists('imap_set_quota')) {
  * Ref: https://www.php.net/manual/en/function.imap-setacl.php
  **/
 if(!function_exists('imap_setacl')) {
-  function imap_setacl() {
+  function imap_setacl($imap_stream , string $mailbox , string $id , string $rights) {
+    try{
+      
+      if(is_empty($rights)){
+        $remove = true;
+      }else{
+        $remove = false;
+      }
+      
+      $imap_stream->setACL($mailbox,$id,[
+        "remove" => $remove,
+        "rights" => $rights
+      ]);
+
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -648,7 +866,7 @@ if(!function_exists('imap_setflag_full')) {
  * Ref: https://www.php.net/manual/en/function.imap-sort.php
  **/
 if(!function_exists('imap_sort')) {
-  function imap_sort() {
+  function imap_sort(resource $imap_stream , int $criteria , int $reverse, int $options = 0, string $search_criteria = NULL, string $charset = NULL ) {
   }
 }
 
@@ -658,7 +876,19 @@ if(!function_exists('imap_sort')) {
  * Ref: https://www.php.net/manual/en/function.imap-status.php
  **/
 if(!function_exists('imap_status')) {
-  function imap_status() {
+  
+  define('SA_MESSAGES',1);
+  define('SA_RECENT',2);
+  define('SA_UNSEEN',16);
+  define('SA_UIDNEXT',4);
+  define('SA_UIDVALIDITY',8);
+  define('SA_ALL',32);
+
+  function imap_status($imap_stream,$mailbox,$options ) {
+    if(!empty($options)){
+      return $imap_stream->status($mailbox,$options);
+    }
+    return $imap_stream->status($mailbox);
   }
 }
 
@@ -668,7 +898,13 @@ if(!function_exists('imap_status')) {
  * Ref: https://www.php.net/manual/en/function.imap-subscribe.php
  **/
 if(!function_exists('imap_subscribe')) {
-  function imap_subscribe() {
+  function imap_subscribe($imap_stream, $mailbox) {
+    try{
+      $imap_stream->subscribeMailbox($mailbox,true);
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -678,7 +914,9 @@ if(!function_exists('imap_subscribe')) {
  * Ref: https://www.php.net/manual/en/function.imap-thread.php
  **/
 if(!function_exists('imap_thread')) {
-  function imap_thread() {
+  function imap_thread($imap_stream, int $options = SE_FREE) {
+    $thread =  $imap_stream->thread($imap_stream->currentMailbox());
+    return $thread->getRawData();
   }
 }
 
@@ -688,7 +926,8 @@ if(!function_exists('imap_thread')) {
  * Ref: https://www.php.net/manual/en/function.imap-timeout.php
  **/
 if(!function_exists('imap_timeout')) {
-  function imap_timeout() {
+  function imap_timeout(int $timeout_type, int $timeout = -1) {
+
   }
 }
 
@@ -698,7 +937,7 @@ if(!function_exists('imap_timeout')) {
  * Ref: https://www.php.net/manual/en/function.imap-uid.php
  **/
 if(!function_exists('imap_uid')) {
-  function imap_uid() {
+  function imap_uid( resource $imap_stream , int $msg_number) {
   }
 }
 
@@ -707,8 +946,21 @@ if(!function_exists('imap_uid')) {
  * imap_undelete - Unmark the message which is marked deleted
  * Ref: https://www.php.net/manual/en/function.imap-undelete.php
  **/
+
+ //used uid instead of msg_number
 if(!function_exists('imap_undelete')) {
-  function imap_undelete() {
+  function imap_undelete($imap_stream,int $msg_number,int $flags = 0 ) {
+    
+    try{
+      $imap_stream->store($imap_stream->currentMailbox, array(
+          'ids' => $msg_number,
+          'remove' => array(Horde_Imap_Client::FLAG_DELETED)
+      ));
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
+
   }
 }
 
@@ -718,7 +970,13 @@ if(!function_exists('imap_undelete')) {
  * Ref: https://www.php.net/manual/en/function.imap-unsubscribe.php
  **/
 if(!function_exists('imap_unsubscribe')) {
-  function imap_unsubscribe() {
+  function imap_unsubscribe($imap_stream, $mailbox) {
+    try{
+      $imap_stream->subscribeMailbox($mailbox,false);
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -740,7 +998,7 @@ if(!function_exists('imap_utf7_decode')) {
  **/
 if(!function_exists('imap_utf7_encode')) {
   function imap_utf7_encode($str_iso_8859) {
-    return mb_convert_encoding( $str, "UTF7-IMAP", "ISO_8859-1" );
+    return mb_convert_encoding( $str_iso_8859, "UTF7-IMAP", "ISO_8859-1" );
   }
 }
 
@@ -761,7 +1019,7 @@ if(!function_exists('imap_utf8_to_mutf7')) {
  * Ref: https://www.php.net/manual/en/function.imap-utf8.php
  **/
 if(!function_exists('imap_utf8')) {
-  function imap_utf8() {
+  function imap_utf8($string) {
     return iconv_mime_decode($string,0,"UTF-8");
   }
 }

@@ -21,7 +21,14 @@
         "files": ["lib/nt-php-imap.php"]
     },
     "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "https://pear.horde.org"
+        }
+    ],
     "require": {
-        "horde/imap-client": "dev-master"
+        "pear-pear.horde.org/Horde_Imap_Client": "*",
+        "pear-pear.horde.org/Horde_Cache": "*"
     }
 }
