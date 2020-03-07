@@ -5,14 +5,13 @@
  * @package nt-php-imap
  */
 require_once("../vendor/autoload.php");
-$imap_alertQueue = [];
-exit;
 
 /**
  * imap_8bit - Convert an 8bit string to a quoted-printable string
  * Ref: https://www.php.net/manual/en/function.imap-8bit.php
  **/
 if(!function_exists('imap_8bit')) {
+  $errors = [];
   function imap_8bit($str_8bit) {
     return quoted_printable_encode($str_8bit);
   }
@@ -23,9 +22,11 @@ if(!function_exists('imap_8bit')) {
  * imap_alerts - Returns all IMAP alert messages that have occurred
  * Ref: https://www.php.net/manual/en/function.imap-alerts.php
  **/
+//unverified
 if(!function_exists('imap_alerts')) {
   function imap_alerts() {
-    return count($imap_alertQueue) ? $imap_alertQueue: false;
+    global $imap_stream;
+    return $imap_stream->alerts();
   }
 }
 
@@ -76,9 +77,20 @@ if(!function_exists('imap_binary')) {
  * Ref: https://www.php.net/manual/en/function.imap-body.php
  **/
 if(!function_exists('imap_body')) {
-  //unverified
+  // unverified | incomplete
+  /*The optional options are a bit mask with one or more of the following:
+
+  FT_UID - The msg_number is a UID
+  FT_PEEK - Do not set the \Seen flag if not already set
+  FT_INTERNAL - The return string is in internal format, will not canonicalize to CRLF.*/
+
+  define('FT_UID',1);
+  define('FT_PEEK',2);
+  define('FT_INTERNAL', 3);
+
   function imap_body($imap_stream, int $msg_number, int $options = 0) {
-    return $imap_stream->fetchFromSectionString($imap_stream->currentMailbox(),$msg_number); 
+    $uid = imap_uid($msg_number);
+    return $imap_stream->fetchFromSectionString($imap_stream->currentMailbox(),$uid); 
   }
 }
 
@@ -88,7 +100,10 @@ if(!function_exists('imap_body')) {
  * Ref: https://www.php.net/manual/en/function.imap-bodystruct.php
  **/
 if(!function_exists('imap_bodystruct')) {
-  function imap_bodystruct() {
+  //unverified | incomplete
+  function imap_bodystruct($imap_stream , int $msg_number , string $section){
+    $uid = imap_uid($msg_number);
+    return $imap_stream->fetchFromSectionString($imap_stream->currentMailbox(),$uid,$section);
   }
 }
 
@@ -98,7 +113,16 @@ if(!function_exists('imap_bodystruct')) {
  * Ref: https://www.php.net/manual/en/function.imap-check.php
  **/
 if(!function_exists('imap_check')) {
-  //unverified
+  //unverified | incomplete
+  /*Returns the information in an object with following properties:
+
+    Date - current system time formatted according to » RFC2822
+    Driver - protocol used to access this mailbox: POP3, IMAP, NNTP
+    Mailbox - the mailbox name
+    Nmsgs - number of messages in the mailbox
+    Recent - number of recent messages in the mailbox
+    
+    Returns FALSE on failure.*/
   function imap_check($imap_stream) {
     return $imap_stream->currentMailbox();
   }
@@ -110,8 +134,29 @@ if(!function_exists('imap_check')) {
  * Ref: https://www.php.net/manual/en/function.imap-clearflag-full.php
  **/
 if(!function_exists('imap_clearflag_full')) {
-  //unverified
+  //unverified | incomplete
+  define('ST_UID', 1);
   function imap_clearflag_full($imap_stream , string $sequence , string $flag, int $options = 0 ) {
+    
+    try{
+      $sequences = explode(",",$sequence);
+    
+      if($options){
+        $obj = new Horde_Imap_Client_Ids($sequences);
+      }else{
+        $obj = new Horde_Imap_Client_Ids($sequences,true);
+      }
+
+      $mailbox = $imap_stream->currentMailbox();
+      $imap_stream->store($mailbox[0],[
+        "remove" => [$flag],
+        "ids" => $obj
+      ]);
+
+      return true;
+    }catch (Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -122,6 +167,7 @@ if(!function_exists('imap_clearflag_full')) {
  **/
 if(!function_exists('imap_close')) {
   //unverfified
+  define('CL_EXPUNGE',1);
   function imap_close($imap_stream, int $flag = 0) {
     try{
       if($flag!=0){
@@ -159,8 +205,14 @@ if(!function_exists('imap_create')) {
 if(!function_exists('imap_createmailbox')) {
   //unverified
   function imap_createmailbox($imap_stream, $mailbox) {
-    $imap_stream->createMailbox();
-    return true;
+    try{
+      $new_mailbox = new Horde_Imap_Client_Mailbox($mailbox);
+      $imap_stream->createMailbox($new_mailbox);
+      return true;
+    }catch(Horde_Imap_Client_Exception $e){
+      return false;
+    }
+    
   }
 }
 
@@ -170,10 +222,18 @@ if(!function_exists('imap_createmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-delete.php
  **/
 if(!function_exists('imap_delete')) {
+  //unverified
   function imap_delete($imap_stream ,$msg_number,$options = 0) {
     try{
-      $imap_stream->store($imap_stream->currentMailbox, array(
-          'ids' => $msg_number,
+      
+      if($options){
+        $id = new Horde_Imap_Client_Ids([$msg_number]);
+      }else{
+        $id = new Horde_Imap_Client_Ids([$msg_number],true);
+      }
+      $mailbox = $imap_stream->currentMailbox();
+      $imap_stream->store($mailbox[0], array(
+          'ids' => $id,
           'add' => array(Horde_Imap_Client::FLAG_DELETED)
       ));
       return true;
@@ -191,8 +251,13 @@ if(!function_exists('imap_delete')) {
 if(!function_exists('imap_deletemailbox')) {
   //unverified
   function imap_deletemailbox($imap_stream, $mailbox) {
-    $imap_stream->deleteMailbox($mailbox);
-    return true;
+    try{
+      $existing_mailbox = new Horde_Imap_Client_Mailbox($mailbox);
+      $imap_stream->deleteMailbox($existing_mailbox);
+      return true;
+     }catch (Horde_Imap_Client_Exception $e){
+        return false;
+     }
   }
 }
 
@@ -202,7 +267,13 @@ if(!function_exists('imap_deletemailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-errors.php
  **/
 if(!function_exists('imap_errors')) {
+  //unverified
   function imap_errors() {
+    global $errors;
+    $temp = $errors;
+    unset($GLOBALS['errors']);
+    $errors = [];
+    return $temp;
   }
 }
 
@@ -213,6 +284,13 @@ if(!function_exists('imap_errors')) {
  **/
 if(!function_exists('imap_expunge')) {
   function imap_expunge( $imap_stream) {
+    try{
+        $mailbox = $imap_stream->currentMailbox();
+        $imap_stream->expunge($mailbox[0]);
+        return true;
+     }catch (Horde_Imap_Client_Exception $e){
+        return false;
+     }
   }
 }
 
@@ -221,8 +299,71 @@ if(!function_exists('imap_expunge')) {
  * imap_fetch_overview - Read an overview of the information in the headers of the given message
  * Ref: https://www.php.net/manual/en/function.imap-fetch-overview.php
  **/
+//incomplete
 if(!function_exists('imap_fetch_overview')) {
-  function imap_fetch_overview() {
+  function imap_fetch_overview($imap_stream, string $sequence, int $options = 0) {
+    $mailbox = $imap_stream->currentMailbox();
+    $query = new Horde_Imap_Client_Fetch_Query();
+    $query->structure();
+
+    if($options){ //uid given
+      $arr = explode(",",$sequence);
+      if(count($arr) >= 2){
+          $uid = [];
+          $max = count($arr);
+          for($i=0;$i<$max;$i++){
+            $uid[$i] = new Horde_Imap_Client_Ids($arr[$i]);
+          }
+
+      }else{
+        $arr = explode(":",$sequence);
+        if(count($arr) == 2){
+           $uid = [];
+           $j=0;
+           for($i=$arr[0]; $i<$arr[1];$i++){
+              $uid[$j]= new Horde_Imap_Client_Ids($i);
+              $j++;
+           } 
+        }
+      }
+
+    }else{
+      $arr = explode(",",$sequence);
+      if(count($arr) >= 2){
+          $uid = [];
+          $max = count($arr);
+          for($i=0;$i<$max;$i++){
+            $uid[$i] = imap_uid($arr[$i]);
+          }
+      }else{
+        $arr = explode(":",$sequence);
+        if(count($arr) == 2){
+           $uid = [];
+           $j=0;
+           for($i=$arr[0]; $i<$arr[1];$i++){
+              $uid[$j]=imap_uid($i);
+              $j++;
+           } 
+        }else{
+          $obj = new stdClass;
+          return $obj;
+        }
+      }
+    }
+
+    $results = $imap_stream->fetch($mailbox[0], $query, array(
+      'ids' => $uid
+    ));
+
+    $structure = [];
+    $i=0;
+    foreach($results as $result){
+      $structure[$i] = $result->getStructure();
+      $i++;
+    }
+
+    return $structure;
+
   }
 }
 
@@ -231,8 +372,18 @@ if(!function_exists('imap_fetch_overview')) {
  * imap_fetchbody - Fetch a particular section of the body of the message
  * Ref: https://www.php.net/manual/en/function.imap-fetchbody.php
  **/
+//incomplete
 if(!function_exists('imap_fetchbody')) {
   function imap_fetchbody($imap_stream , int $msg_number , string $section, int $options = 0) {
+    $mailbox = $imap_stream->currentMailbox();
+    $query = new Horde_Imap_Client_Fetch_Query();
+    $query->structure();
+
+    $uid = imap_uid($msg_number);
+
+    $result = $imap_stream->fetch($mailbox[0], $query, array(
+      'ids' => $uid
+    ));
   }
 }
 
@@ -273,6 +424,7 @@ if(!function_exists('imap_fetchstructure')) {
  **/
 if(!function_exists('imap_fetchtext')) {
   function imap_fetchtext() {
+    imap_body();
   }
 }
 
@@ -281,9 +433,19 @@ if(!function_exists('imap_fetchtext')) {
  * imap_gc - Clears IMAP cache
  * Ref: https://www.php.net/manual/en/function.imap-gc.php
  **/
+//incomplete
 if(!function_exists('imap_gc')) {
-  function imap_gc() {
-    imap_body();
+  define('IMAP_GC_ELT',1);
+  define('IMAP_GC_ENV',2);
+  define('IMAP_GC_TEXTS',3);
+
+  function imap_gc($imap_stream,int $caches) {
+    try{
+      $imap_stream->$cache->deleteMailbox();
+      return true;
+    }catch(Horde_Imap_Client_Exception $e){
+      return false;
+    }
   }
 }
 
@@ -666,8 +828,10 @@ if(!function_exists('imap_rename')) {
 if(!function_exists('imap_renamemailbox')) {
   function imap_renamemailbox($imap_stream, string $old_mbox, string $new_mbox) {
     try{
+      $old_mailbox = new Horde_Imap_Client_Mailbox($old_mbox);
+      $new_mailbox = new Horde_Imap_Client_Mailbox($new_mbox);
       
-      $imap_stream->renameMailbox($old_mbox,$new_mbox);
+      $imap_stream->renameMailbox($old_mailbox,$new_mailbox);
       return true;
 
     }catch (Horde_Imap_Client_Exception $e){
@@ -900,6 +1064,7 @@ if(!function_exists('imap_status')) {
 if(!function_exists('imap_subscribe')) {
   function imap_subscribe($imap_stream, $mailbox) {
     try{
+      $mailbox = new Horde_Imap_Client_Mailbox($mailbox);
       $imap_stream->subscribeMailbox($mailbox,true);
       return true;
     }catch (Horde_Imap_Client_Exception $e){
@@ -915,7 +1080,8 @@ if(!function_exists('imap_subscribe')) {
  **/
 if(!function_exists('imap_thread')) {
   function imap_thread($imap_stream, int $options = SE_FREE) {
-    $thread =  $imap_stream->thread($imap_stream->currentMailbox());
+    $mailbox = $imap_stream->currentMailbox();
+    $thread =  $imap_stream->thread($mailbox[0]);
     return $thread->getRawData();
   }
 }
@@ -952,7 +1118,8 @@ if(!function_exists('imap_undelete')) {
   function imap_undelete($imap_stream,int $msg_number,int $flags = 0 ) {
     
     try{
-      $imap_stream->store($imap_stream->currentMailbox, array(
+      $mailbox = $imap_stream->currentMailbox();
+      $imap_stream->store($mailbox[0], array(
           'ids' => $msg_number,
           'remove' => array(Horde_Imap_Client::FLAG_DELETED)
       ));
@@ -972,6 +1139,7 @@ if(!function_exists('imap_undelete')) {
 if(!function_exists('imap_unsubscribe')) {
   function imap_unsubscribe($imap_stream, $mailbox) {
     try{
+      $mailbox = new Horde_Imap_Client_Mailbox($mailbox);
       $imap_stream->subscribeMailbox($mailbox,false);
       return true;
     }catch (Horde_Imap_Client_Exception $e){
