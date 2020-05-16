@@ -538,7 +538,36 @@ if(!function_exists('imap_headerinfo')) {
  * Ref: https://www.php.net/manual/en/function.imap-headers.php
  **/
 if(!function_exists('imap_headers')) {
-  function imap_headers() {
+  function imap_headers($imap_stream) {
+    $query = new Horde_Imap_Client_Fetch_Query();
+    $query->envelope();
+    $query->structure();
+
+    $mailbox = $imap_stream->currentMailbox();
+    if(is_array($mailbox)){
+      $curMailBox = $mailbox["mailbox"];
+      $messages = $imap_stream->fetch($curMailBox, $query);
+      $headers = array();
+      foreach($messages as $message){
+        $envelope = $message->getEnvelope();
+        $flags = $message->getFlags();
+
+        $msghdr = array();
+        $msghdr['recipients'] = $envelope->to->bare_addresses;
+        $msghdr['senders']    = $envelope->from->bare_addresses;
+        $msghdr['cc']         = $envelope->cc->bare_addresses;
+        $msghdr['bcc']         = $envelope->bcc->bare_addresses;
+        $msghdr['subject']    = $envelope->subject;
+        $msghdr['timestamp']  = $envelope->date->getTimestamp();
+        $msghdr['flags'] = $flags;
+
+        array_push($headers,$msghdr);
+      }
+      return $headers;
+    }else{
+      return array();
+    }
+
   }
 }
 
