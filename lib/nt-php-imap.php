@@ -707,7 +707,9 @@ if(!function_exists('imap_mail_move')) {
  * Ref: https://www.php.net/manual/en/function.imap-mail.php
  **/
 if(!function_exists('imap_mail')) {
-  function imap_mail() {
+  function imap_mail($to ,$subject,$message) {
+    $result = mail($to,$subject,$message);
+    return $result;
   }
 }
 
