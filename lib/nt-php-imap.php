@@ -581,7 +581,17 @@ if(!function_exists('imap_listmailbox')) {
  **/
 if(!function_exists('imap_listscan')) {
   function imap_listscan($imap_stream , string $ref , string $pattern , string $content) {
-    
+    $mailBoxes = $imap_stream->listMailboxes($pattern);
+    $selMailBoxes = array();
+
+    foreach($mailBoxes as $mailBox){
+      $curMailBox = $mailBox['mailbox'];
+      $tmp = strtolower($curMailBox->utf8);
+      if(strpos($tmp,$content) || $tmp==$content){
+          array_push($selMailBoxes,$mailBox);
+      }
+    }
+    return $selMailBoxes;
   }
 }
 
