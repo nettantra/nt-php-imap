@@ -482,8 +482,8 @@ if(!function_exists('imap_get_quotaroot')) {
  * Ref: https://www.php.net/manual/en/function.imap-getacl.php
  **/
 if(!function_exists('imap_getacl')) {
-  function imap_getacl( resource $imap_stream , string $mailbox) {
-    return $imap_stream->getACL($mailbox);
+  function imap_getacl($imap_stream,$mailbox) {
+    return $imap_stream->getMyACLRights($mailbox);
   }
 }
 
