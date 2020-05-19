@@ -586,7 +586,7 @@ if(!function_exists('imap_last_error')) {
  **/
 if(!function_exists('imap_list')) {
   function imap_list($imap_stream , string $ref , string $pattern) {
-    return $imap_stream->listMailboxes($pattern);
+    return $imap_stream->listMailboxes($ref."".$pattern);
   }
 }
 
@@ -597,7 +597,7 @@ if(!function_exists('imap_list')) {
  **/
 if(!function_exists('imap_listmailbox')) {
   function imap_listmailbox($imap_stream, $ref,$pattern) {
-    imap_list($imap_stream, $ref,$pattern);
+    return imap_list($imap_stream, $ref,$pattern);
   }
 }
 
@@ -639,8 +639,8 @@ if(!function_exists('imap_listsubscribed')) {
  * Ref: https://www.php.net/manual/en/function.imap-lsub.php
  **/
 if(!function_exists('imap_lsub')) {
-  function imap_lsub($imap_stream , string $ref , string $pattern ) {
-    return $imap_stream->listMailboxes($pattern,Horde_Imap_Client::MBOX_SUBSCRIBED_EXISTS);
+  function imap_lsub($imap_stream,$ref,$pattern) {
+    return $imap_stream->listMailboxes($ref."".$pattern,Horde_Imap_Client::MBOX_SUBSCRIBED_EXISTS);
   }
 }
 
