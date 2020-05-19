@@ -135,8 +135,8 @@ if(!function_exists('imap_check')) {
  **/
 if(!function_exists('imap_clearflag_full')) {
   //unverified | incomplete
-  define('ST_UID', 1);
-  function imap_clearflag_full($imap_stream , string $sequence , string $flag, int $options = 0 ) {
+  define("ST_UID",1);
+  function imap_clearflag_full($imap_stream ,$sequence,$flag,$options = 0) {
     
     try{
       $sequences = explode(",",$sequence);
@@ -222,10 +222,9 @@ if(!function_exists('imap_createmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-delete.php
  **/
 if(!function_exists('imap_delete')) {
-  //unverified
+  define('FT_UID',1);
   function imap_delete($imap_stream ,$msg_number,$options = 0) {
     try{
-      
       if($options){
         $id = new Horde_Imap_Client_Ids([$msg_number]);
       }else{
@@ -249,11 +248,10 @@ if(!function_exists('imap_delete')) {
  * Ref: https://www.php.net/manual/en/function.imap-deletemailbox.php
  **/
 if(!function_exists('imap_deletemailbox')) {
-  //unverified
   function imap_deletemailbox($imap_stream, $mailbox) {
     try{
-      $current = new Horde_Imap_Client_Mailbox($mailbox);
-      $imap_stream->deleteMailbox($current['mailbox']);
+      $mailbox = new Horde_Imap_Client_Mailbox($mailbox);
+      $imap_stream->deleteMailbox($mailbox);
       return true;
      }catch (Horde_Imap_Client_Exception $e){
         return false;
