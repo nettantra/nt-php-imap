@@ -752,7 +752,8 @@ if(!function_exists('imap_msgno')) {
  * Ref: https://www.php.net/manual/en/function.imap-mutf7-to-utf8.php
  **/
 if(!function_exists('imap_mutf7_to_utf8')) {
-  function imap_mutf7_to_utf8() {
+  function imap_mutf7_to_utf8($in) {
+    return iconv(mb_detect_encoding($text, mb_detect_order(), true), "UTF-8", $text);
   }
 }
 
