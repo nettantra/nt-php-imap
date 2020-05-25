@@ -607,8 +607,8 @@ if(!function_exists('imap_listmailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-listscan.php
  **/
 if(!function_exists('imap_listscan')) {
-  function imap_listscan($imap_stream , string $ref , string $pattern , string $content) {
-    $mailBoxes = $imap_stream->listMailboxes($pattern);
+  function imap_listscan($imap_stream , $ref , $pattern , $content) {
+    $mailBoxes = $imap_stream->listMailboxes($ref."".$pattern);
     $selMailBoxes = array();
 
     foreach($mailBoxes as $mailBox){
@@ -669,7 +669,7 @@ if(!function_exists('imap_mail_copy')) {
     if(isset($source['mailbox'])){
       $imap_stream->copy($source['mailbox'],$mailbox,[
         "ids" => $msglist,
-        "move" => $options=="11" ? true:false 
+        "move" => $options=="10" ? true:false 
       ]);
       
     }else{
@@ -927,7 +927,7 @@ if(!function_exists('imap_renamemailbox')) {
  * Ref: https://www.php.net/manual/en/function.imap-reopen.php
  **/
 if(!function_exists('imap_reopen')) {
-  function imap_reopen($imap_stream , string $mailbox, int $options = 0, int $n_retries = 0) {
+  function imap_reopen($imap_stream , $mailbox,$options = 0,$n_retries = 0) {
     try{
       
       $imap_stream->openMailbox($mailbox);

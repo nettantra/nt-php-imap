@@ -1,0 +1,69 @@
+//to be implemented
+1.rnd imap_last_error ( void ) : string
+2.rndT imap_mail_compose ( array $envelope , array $body ) : string
+3.rnd imap_mime_header_decode ( string $text ) : array
+4.rnd imap_msgno ( resource $imap_stream , int $uid ) : int
+5.rnd imap_ping ( resource $imap_stream ) : bool
+6.rndT imap_rfc822_parse_headers ( string $headers [, string $defaulthost = "UNKNOWN" ] ) : object
+7.rndT imap_setflag_full ( resource $imap_stream , string $sequence , string $flag [, int $options = NIL ] ) : bool
+
+
+8.rnd imap_timeout ( int $timeout_type [, int $timeout = -1 ] ) : mixed
+    
+9.rnd imap_uid ( resource $imap_stream , int $msg_number ) : int
+    imp/lib/contents.php line: 1357
+
+10.rnd imap_savebody ( resource $imap_stream , mixed $file , int $msg_number [, string $part_number = "" [, int $options = 0 ]] ) : bool
+11.rnd  imap_headerinfo ( resource $imap_stream , int $msg_number [, int $fromlength = 0 [, int $subjectlength = 0 [, string $defaulthost = NULL ]]] ) : object
+12.rndT imap_fetchheader( resource $imap_stream , int $msg_number [, int $options = 0 ] ) : string
+13.rndT imap_fetchmime ( resource $imap_stream , int $msg_number , string $section [, int $options = 0 ] ) : string
+14.rndT imap_fetchstructure ( resource $imap_stream , int $msg_number [, int $options = 0 ] ) : object
+
+//implemented but faulty
+15. imap_clearflag_full 
+16. imap_close 
+17. imap_delete 
+18. imap_fetch_overview 
+19. imap_get_quota
+20. imap_get_quotaroot 
+21. imap_getacl
+22. imap_getmailboxes
+23. imap_getsubscribed
+24. imap_list
+25. imap_lsub
+26. imap_open
+27. imap_set_quota
+28. imap_setacl
+29. imap_status
+30. imap_thread
+31. imap_undelete
+32. imap_headers
+33. imap_listscan 
+34. imap_mail
+35. imap_body
+36. imap_bodystruct 
+37. imap_check
+38. imap_errors
+39. imap_fetchbody
+40. imap_gc
+41. imap_mailboxmsginfo
+42. imap_reopen
+43. imap_search
+44. imap_mail_copy
+45. imap_mail_move
+46. imap_sort
+47. imap_num_msg
+48. imap_num_recent
+
+//verified
+1. imap_create 
+2. imap_createmailbox 
+3. imap_deletemailbox 
+4. imap_expunge
+5. imap_qprint
+6. imap_renamemailbox
+7. imap_subscribe
+8. imap_unsubscribe
+9. imap_rfc822_parse_adrlist
+
+
